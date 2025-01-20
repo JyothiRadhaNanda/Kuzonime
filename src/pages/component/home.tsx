@@ -7,17 +7,21 @@ const HomePage = () => {
   const [penerbit, setPenerbit] = useState("");
   const [tahunTerbit, setTahunTerbit] = useState("");
   const [books, setBooks] = useState<any[]>([]);
+  const [gambar, setGambar] = useState<File | null>(null);
+  const [pdf, setPdf] = useState<File | null>(null);
 
   // Fetch data saat halaman pertama kali dimuat
   useEffect(() => {
     fetchBooks();
   }, []);
 
-  const [gambar, setGambar] = useState<File | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "gambar" | "pdf"
+  ) => {
     if (e.target.files && e.target.files.length > 0) {
-      setGambar(e.target.files[0]);
+      if (type === "gambar") setGambar(e.target.files[0]);
+      if (type === "pdf") setPdf(e.target.files[0]);
     }
   };
 
@@ -65,6 +69,10 @@ const HomePage = () => {
       formData.append("gambar", gambar); // Tambahkan gambar ke FormData
     }
 
+    if (pdf) {
+      formData.append("pdf", pdf); // Tambahkan PDF ke FormData
+    }
+
     try {
       await axios.post("http://localhost:3030/books/add", formData, {
         headers: {
@@ -78,6 +86,7 @@ const HomePage = () => {
       setPenerbit("");
       setTahunTerbit("");
       setGambar(null); // Reset input file
+      setPdf(null); // Reset input file PDF
     } catch (error) {
       console.error("Error adding book:", error);
       alert("Terjadi kesalahan saat menambahkan buku");
@@ -112,7 +121,17 @@ const HomePage = () => {
           value={tahunTerbit}
           onChange={(e) => setTahunTerbit(e.target.value)}
         />
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileChange(e, "gambar")}
+        />
+        <input
+          placeholder="add pdf"
+          type="file"
+          accept="application/pdf"
+          onChange={(e) => handleFileChange(e, "pdf")}
+        />
         <button type="submit">Tambah Buku</button>
       </form>
 
@@ -127,7 +146,19 @@ const HomePage = () => {
                 style={{ width: "150px", height: "auto" }}
               />
             )}
-            {book.judul} oleh {book.penulis} - {book.tahun_terbit}
+            <div>
+              <strong>{book.judul}</strong> oleh {book.penulis} -{" "}
+              {book.tahun_terbit}
+            </div>
+            {book.pdf && (
+              <a
+                href={`http://localhost:3030${book.pdf}`} // Link ke PDF
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Lihat PDF
+              </a>
+            )}
             <button onClick={() => handleDelete(book.id)}>Hapus</button>
             <button onClick={() => handleEdit(book)}>Edit</button>
           </li>

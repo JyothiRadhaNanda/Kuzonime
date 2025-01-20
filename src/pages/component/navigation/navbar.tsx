@@ -2,8 +2,8 @@ import "@/styles/navbar.css";
 
 export default function Navbar() {
   return (
-    <div className="test">
-      <h1>test</h1>
+    <div className="">
+      <h1 className="text-green-500">test</h1>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import AddBook from "./CRUD/create";
 import HomePage from "./component/home";
-import Navbar from "./navigation/navbar";
+import Navbar from "./component/navigation/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
