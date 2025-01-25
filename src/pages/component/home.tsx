@@ -74,9 +74,11 @@ const HomePage = () => {
     }
 
     try {
+      const token = localStorage.getItem("token"); // Ambil token dari localStorage
       await axios.post("http://localhost:3030/books/add", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`, // Menambahkan token di header Authorization
         },
       });
       alert("Buku berhasil ditambahkan!");

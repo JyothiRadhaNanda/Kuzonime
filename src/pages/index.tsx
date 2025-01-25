@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 import AddBook from "./CRUD/create";
 import HomePage from "./component/home";
 import Navbar from "./component/navigation/navbar";
-
+import App from "./component/app";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,8 +20,9 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <HomePage />
+      {/* <HomePage /> */}
       <AddBook />
+      <App />
     </div>
   );
 }
