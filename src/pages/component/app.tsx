@@ -1,18 +1,20 @@
-// src/components/App.tsx
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Login from "./login";
-import HomePage from "./home"; // Pastikan Anda sudah memiliki komponen HomePage
+import Register from "./register";
+import HomePage from "./home";
+import Navbar from "./navigation/navbar"; // Pastikan Navbar di-import
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  // Periksa apakah token sudah ada di localStorage saat pertama kali aplikasi di-load
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
-      setIsLoggedIn(true); // Anggap pengguna sudah login jika ada token
+      setIsLoggedIn(true);
     }
   }, []);
 
@@ -22,24 +24,20 @@ const App = () => {
     password: string
   ) => {
     try {
-      // Kirim permintaan login ke backend
       const response = await fetch("http://localhost:3030/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      console.log("Login Response:", data); // Debug respons login
+      console.log("Login Response:", data);
 
       if (response.ok && data.token) {
-        localStorage.setItem("token", data.token); // Simpan token ke localStorage
-        setToken(data.token); // Set token di state
-        setIsLoggedIn(true); // Set status login
+        localStorage.setItem("token", data.token);
+        setToken(data.token);
+        setIsLoggedIn(true); // <-- Pastikan state diperbarui
       } else {
-        console.error("Login failed:", data.message || "Unknown error");
         alert("Login gagal. Periksa kembali email dan password.");
       }
     } catch (error) {
@@ -48,22 +46,50 @@ const App = () => {
     }
   };
 
+  const handleRegister = async (
+    username: string,
+    email: string,
+    password: string
+  ) => {
+    try {
+      const response = await fetch("http://localhost:3030/user/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+      console.log("Register Response:", data);
+
+      if (response.ok) {
+        alert("Registrasi berhasil! Silakan login.");
+        setIsRegistering(false);
+      } else {
+        alert("Registrasi gagal: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("Terjadi kesalahan saat mencoba registrasi.");
+    }
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Hapus token dari localStorage
-    setToken(null); // Reset state token
-    setIsLoggedIn(false); // Set status login ke false
+    localStorage.removeItem("token");
+    setToken(null);
+    setIsLoggedIn(false);
   };
 
   return (
     <div>
+      {/* Navbar akan selalu muncul di semua halaman */}
+      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+
       {isLoggedIn ? (
         <div>
-          <h1>Welcome to Book Management App</h1>
-          <HomePage /> {/* Tampilkan komponen HomePage setelah login */}
-          <button onClick={handleLogout}>Logout</button> {/* Tombol logout */}
+          <HomePage />
         </div>
       ) : (
-        <Login onLogin={handleLogin} />
+        <div>harap login terlebih dahulu</div>
       )}
     </div>
   );

@@ -1,6 +1,9 @@
-import "@/styles/globals.css"; // Mengimpor file CSS global dengan Tailwind
-import type { AppProps } from "next/app"; // Mengimpor tipe untuk AppProps
+import "../styles/globals.css"; // Jika ada styling global
+import type { AppProps } from "next/app";
+import Layout from "./component/navigation/layout"; // Sesuaikan path
 
-export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />; // Render halaman dengan props yang diteruskan
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
 }
+
+export default MyApp;

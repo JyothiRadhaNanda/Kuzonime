@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import AddBook from "../CRUD/create";
 
 const HomePage = () => {
   const [judul, setJudul] = useState("");
@@ -9,7 +10,7 @@ const HomePage = () => {
   const [books, setBooks] = useState<any[]>([]);
   const [gambar, setGambar] = useState<File | null>(null);
   const [pdf, setPdf] = useState<File | null>(null);
-
+  const userId = localStorage.getItem("id");
   // Fetch data saat halaman pertama kali dimuat
   useEffect(() => {
     fetchBooks();
@@ -44,7 +45,13 @@ const HomePage = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:3030/books/${id}/delete`);
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:3030/books/${id}/delete`, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setBooks(books.filter((book) => book.id !== id));
       alert("Buku berhasil dihapus!");
     } catch (error) {
@@ -97,75 +104,62 @@ const HomePage = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <h2>Tambah Buku</h2>
-        <input
-          type="text"
-          placeholder="Judul"
-          value={judul}
-          onChange={(e) => setJudul(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Penulis"
-          value={penulis}
-          onChange={(e) => setPenulis(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Penerbit"
-          value={penerbit}
-          onChange={(e) => setPenerbit(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Tahun Terbit"
-          value={tahunTerbit}
-          onChange={(e) => setTahunTerbit(e.target.value)}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleFileChange(e, "gambar")}
-        />
-        <input
-          placeholder="add pdf"
-          type="file"
-          accept="application/pdf"
-          onChange={(e) => handleFileChange(e, "pdf")}
-        />
-        <button type="submit">Tambah Buku</button>
-      </form>
-
       <h1>Daftar Buku</h1>
-      <ul>
+      <div className="grid grid-cols-4 gap-4">
         {books.map((book) => (
-          <li key={book.id}>
+          <div
+            key={book.id}
+            className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
+          >
             {book.gambar && (
-              <img
-                src={`http://localhost:3030${book.gambar}`} // Gunakan path dari backend
-                alt={book.judul}
-                style={{ width: "150px", height: "auto" }}
-              />
-            )}
-            <div>
-              <strong>{book.judul}</strong> oleh {book.penulis} -{" "}
-              {book.tahun_terbit}
-            </div>
-            {book.pdf && (
-              <a
-                href={`http://localhost:3030${book.pdf}`} // Link ke PDF
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Lihat PDF
+              <a href="#">
+                <img
+                  className="rounded-t-lg"
+                  src={`http://localhost:3030${book.gambar}`}
+                  alt={book.judul}
+                />
               </a>
             )}
-            <button onClick={() => handleDelete(book.id)}>Hapus</button>
-            <button onClick={() => handleEdit(book)}>Edit</button>
-          </li>
+            <div className="p-5">
+              <a href="#">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {book.judul}
+                </h5>
+              </a>
+              <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                Oleh {book.penulis} - {book.tahun_terbit}
+              </p>
+              {book.pdf && (
+                <a
+                  href={`http://localhost:3030${book.pdf}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mb-3 text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Lihat PDF
+                </a>
+              )}
+
+              {Number(userId) === Number(book.userId) && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDelete(book.id)}
+                    className="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800"
+                  >
+                    Hapus
+                  </button>
+                  <button
+                    onClick={() => handleEdit(book)}
+                    className="px-3 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
